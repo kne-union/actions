@@ -11,4 +11,4 @@ jobs:
     steps:
       - uses: kne-union/actions-manifest@master
         with:
-          github_token: ${{ secrets.ADMIN_TOKEN }}
+          token: ${{ secrets.ADMIN_TOKEN }}

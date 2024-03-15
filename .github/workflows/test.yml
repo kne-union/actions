@@ -14,6 +14,7 @@ jobs:
         with:
           repository: 'kne-union/static-data'
           ref: 'master'
+          token: ${{ secrets.PAT }}
       - run: |
           rm -rf ./manifest && mkdir ./manifest
           npx @kne/npm-tools manifest

@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: 'master'
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           rm -rf ./manifest && mkdir ./manifest
           npx @kne/npm-tools manifest

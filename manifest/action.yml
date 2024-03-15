@@ -1,6 +1,7 @@
 name: "Generate Ued manifest"
 description: "生成ued所需的所有所需描述文件并且推送至website项目"
 runs:
+  using: 'composite'
   steps:
     - uses: actions/checkout@v4
       with:
@@ -15,5 +16,3 @@ runs:
     - run: rm -rf ./workspace
     - run: git commit -am "Regenerate Manifest By Actions"
     - run: git push origin master
-
-

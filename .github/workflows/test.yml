@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: kne-union/actions-manifest@master
+      - uses: kne-union/actions-deploy-static-data@master
         with:
           token: ${{ secrets.ADMIN_TOKEN }}
+          name: test

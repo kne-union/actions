@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
       - uses: kne-union/actions-deploy-static-data@master
         with:
           token: ${{ secrets.ADMIN_TOKEN }}

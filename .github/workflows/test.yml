@@ -10,6 +10,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: ls
       - uses: kne-union/actions-deploy-static-data@master
         with:
           token: ${{ secrets.ADMIN_TOKEN }}

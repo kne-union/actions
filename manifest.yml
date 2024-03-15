@@ -1,18 +1,19 @@
 name: "Generate Ued manifest"
 description: "生成ued所需的所有所需描述文件并且推送至website项目"
 runs:
-  - uses: actions/checkout@v4
-    with:
-      repository: 'kne-union/static-data'
-      ref: 'master'
-      path: ./workspace
-  - run: rf -rf ./manifest && mkdir ./manifest
-  - run: |
-      cd ./workspace
-      npx @kne/npm-tools manifest
-      cp -r ./build/* ../manifest
-  - run: rm -rf ./workspace
-  - run: git commit -am "Regenerate Manifest By Actions"
-  - run: git push origin master
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'kne-union/static-data'
+        ref: 'master'
+        path: ./workspace
+    - run: rf -rf ./manifest && mkdir ./manifest
+    - run: |
+        cd ./workspace
+        npx @kne/npm-tools manifest
+        cp -r ./build/* ../manifest
+    - run: rm -rf ./workspace
+    - run: git commit -am "Regenerate Manifest By Actions"
+    - run: git push origin master
 
 

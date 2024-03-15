@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: 'kne-union/static-data'
           ref: 'master'
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |

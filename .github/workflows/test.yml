@@ -11,6 +11,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 'master'
       - run: |
           rm -rf ./manifest && mkdir ./manifest
           npx @kne/npm-tools manifest

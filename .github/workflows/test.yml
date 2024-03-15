@@ -11,16 +11,11 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: 'kne-union/static-data'
-          ref: 'master'
       - run: |
           rm -rf ./manifest && mkdir ./manifest
           npx @kne/npm-tools manifest
           cp -r ./build/* ./manifest
           rm -rf ./build
-      - uses: ad-m/github-push-action@master
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: 'master'
-          force: true

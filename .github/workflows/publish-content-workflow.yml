@@ -1,0 +1,24 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      repository:
+        required: false
+        type: string
+jobs:
+  publish-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+          cache: 'md-index-npm-cache'
+      - name: manifest 🏗️
+        run: npx @kne/md-index
+      - uses: kne-union/actions-deploy-static-data@master
+        with:
+          token: ${{ secrets.ADMIN_TOKEN }}
+          name: ${{inputs.name}}

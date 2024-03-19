@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           registry-url: https://registry.npmjs.org/
-          cache: 'md-index-npm-cache'
+          cache: 'npm'
       - name: manifest 🏗️
         run: npx @kne/md-index
       - uses: kne-union/actions-deploy-static-data@master

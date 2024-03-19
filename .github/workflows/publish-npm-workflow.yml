@@ -8,13 +8,14 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{secrets.NODE_AUTH_TOKEN}}
-      - run: echo ${{secrets.KNE_PACKAGE_PUBLISH}}
       - uses: actions/download-artifact@v4
         with:
           name: build-dist
           path: ./
-      - name: Publish To Npm
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+      - name: Publish Npm
         env:
           NODE_AUTH_TOKEN: ${{secrets.KNE_PACKAGE_PUBLISH}}
         run: npm publish --access=public

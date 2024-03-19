@@ -1,7 +1,7 @@
 on:
   workflow_call:
     inputs:
-      name:
+      packageName:
         required: true
         type: string
     secrets:
@@ -17,4 +17,4 @@ jobs:
         run: npm publish --access=public
 
       - name: Sync To Cnpm
-        run: npx cnpm sync ${{inputs.name}}
+        run: npx cnpm sync ${{inputs.packageName}}

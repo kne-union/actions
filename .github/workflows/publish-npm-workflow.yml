@@ -11,10 +11,10 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - name: Publish To Npm
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
-        run: npm publish --access=public
+    - name: Publish To Npm
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
+      run: npm publish --access=public
 
-      - name: Sync To Cnpm
-        run: npx cnpm sync ${{inputs.package_name}}
+    - name: Sync To Cnpm
+      run: npx cnpm sync ${{inputs.package_name}}

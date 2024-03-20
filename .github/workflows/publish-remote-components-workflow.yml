@@ -24,6 +24,8 @@ jobs:
     needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
   sync-static-data:
     runs-on: ubuntu-latest
     needs: publish-npm

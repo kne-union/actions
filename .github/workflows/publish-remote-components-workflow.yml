@@ -21,7 +21,7 @@ jobs:
             ./build
             ./package.json
   publish-npm:
-    needs: build-lib
+    needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit
   sync-static-data:

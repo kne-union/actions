@@ -46,7 +46,7 @@ jobs:
           npm run init-example
           npm run build:example
           rm -rf ./build && rm -rf ./package.json && mkdir ./build 
-          cp -r ./example/build/* ./build && cp /example/package.json ./
+          cp -r ./example/build/* ./build && cp ./example/package.json ./
       - uses: actions/upload-artifact@v4
         with:
           name: example-dist

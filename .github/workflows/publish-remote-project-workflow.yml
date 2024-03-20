@@ -31,10 +31,11 @@ jobs:
             ./build
             ./package.json
   publish-npm:
-    needs: build-lib
+    needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit
-
+    with:
+      package_name: ${{inputs.package_name}}
   release:
     needs: publish-npm
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master

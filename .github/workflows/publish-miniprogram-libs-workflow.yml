@@ -7,9 +7,6 @@ on:
       APP_ID:
         required: true
         type: string
-    secrets:
-      PRIVATE_KEY:
-        required: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,4 +44,17 @@ jobs:
     with:
       package_name: ${{inputs.package_name}}
       artifact: example-dist
+  publish-qrcode:
+    needs: publish-miniprogram
+    uses: kne-union/actions/.github/workflows/publish-miniprogram-qrcode.yml@master
+    secrets: inherit
+    with:
+      APP_ID: ${{inputs.APP_ID}}
+  release:
+    needs: publish-npm
+    uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+
 

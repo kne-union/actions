@@ -1,21 +1,26 @@
 on:
   workflow_call:
     inputs:
-      repository:
-        required: false
+      APP_ID:
+        required: true
         type: string
+    secrets:
+      TOKEN_SECRET:
+        required: true
+
 jobs:
-  publish-content:
+  miniprogram-qrcode:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           registry-url: https://registry.npmjs.org/
-      - name: manifest 🏗️
-        run: npx @kne/md-index
+      - run: npx @kne/miniprogram-tools qrcode
+        env:
+          APP_ID: ${{inputs.APP_ID}}
+          SECRET: ${{secrets.TOKEN_SECRET}}
       - uses: kne-union/actions-deploy-static-data@master
         with:
-          repository: ${{inputs.repository}}
           token: ${{ secrets.ADMIN_TOKEN }}
           name: ${{context.repository.name}}

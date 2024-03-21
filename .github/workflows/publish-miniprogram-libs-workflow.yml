@@ -7,10 +7,10 @@ on:
       APP_ID:
         required: true
         type: string
-      TOKEN_SECRET:
+      PRIVATE_KEY_NAME:
         required: true
         type: string
-      PRIVATE_KEY:
+      TOKEN_SECRET_NAME:
         required: true
         type: string
 jobs:
@@ -43,7 +43,7 @@ jobs:
     with:
       PROJECT_DIR: ./example
       APP_ID: ${{inputs.APP_ID}}
-      PRIVATE_KEY: ${{inputs.PRIVATE_KEY}}
+      PRIVATE_KEY_NAME: ${{inputs.PRIVATE_KEY_NAME}}
   publish-npm:
     needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
@@ -57,7 +57,7 @@ jobs:
     secrets: inherit
     with:
       APP_ID: ${{inputs.APP_ID}}
-      TOKEN_SECRET: ${{inputs.TOKEN_SECRET}}
+      TOKEN_SECRET_NAME: ${{inputs.TOKEN_SECRET_NAME}}
   release:
     needs: publish-npm
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master

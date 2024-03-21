@@ -4,7 +4,7 @@ on:
       APP_ID:
         required: true
         type: string
-      TOKEN_SECRET:
+      TOKEN_SECRET_NAME:
         required: true
         type: string
 
@@ -19,7 +19,7 @@ jobs:
       - run: npx @kne/miniprogram-tools qrcode
         env:
           APP_ID: ${{inputs.APP_ID}}
-          SECRET: ${{secrets.TOKEN_SECRET}}
+          SECRET: ${{secrets[inputs.TOKEN_SECRET_NAME]}}
       - uses: kne-union/actions-deploy-static-data@master
         with:
           token: ${{ secrets.ADMIN_TOKEN }}

@@ -16,7 +16,7 @@ on:
       APP_ID:
         required: true
         type: string
-      PRIVATE_KEY:
+      PRIVATE_KEY_NAME:
         required: true
         type: string
 jobs:
@@ -34,5 +34,5 @@ jobs:
         env:
           PROJECT_DIR: ${{inputs.PROJECT_DIR}}
           APP_ID: ${{inputs.APP_ID}}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets[inputs.PRIVATE_KEY_NAME] }}
 

@@ -42,6 +42,7 @@ jobs:
     uses: kne-union/actions/.github/workflows/publish-miniprogram-workflow.yml@master
     secrets: inherit
     with:
+      artifact: example-dist
       PROJECT_DIR: ./example
       APP_ID: ${{inputs.APP_ID}}
       PRIVATE_KEY_NAME: ${{inputs.PRIVATE_KEY_NAME}}
@@ -51,7 +52,6 @@ jobs:
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-      artifact: example-dist
   publish-qrcode:
     needs: publish-miniprogram
     uses: kne-union/actions/.github/workflows/publish-miniprogram-qrcode.yml@master

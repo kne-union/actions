@@ -20,7 +20,7 @@ jobs:
         env:
           APP_ID: ${{inputs.APP_ID}}
           SECRET: ${{secrets[inputs.TOKEN_SECRET_NAME]}}
-      - run: echo "STATIC_DEPLOY_NAME=$(${{ github.repository }} | awk -F'/' '{print $2}')" >> "$GITHUB_ENV"
+      - run: echo "STATIC_DEPLOY_NAME=$(echo ${{ github.repository }} | awk -F'/' '{print $2}')" >> "$GITHUB_ENV"
       - uses: kne-union/actions-deploy-static-data@master
         with:
           token: ${{ secrets.ADMIN_TOKEN }}

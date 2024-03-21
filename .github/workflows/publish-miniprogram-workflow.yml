@@ -2,12 +2,12 @@ on:
   workflow_call:
     inputs:
       artifact:
-        required: true
+        required: false
         type: string
         default:
           build-dist
       PROJECT_DIR:
-        required: true
+        required: false
         type: string
         default: ./
       APP_ID:

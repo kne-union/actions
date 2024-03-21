@@ -36,7 +36,7 @@ jobs:
           path: |
             ./example/dist
             ./example/package.json
-            ./example
+            ./example/project.config.json
   publish-miniprogram:
     needs: build
     uses: kne-union/actions/.github/workflows/publish-miniprogram-workflow.yml@master

@@ -14,8 +14,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: manifest 🏗️
         run: npx @kne/md-index
+      - run: echo "STATIC_DEPLOY_NAME=$(${{ github.repository }} | awk -F'/' '{print $2}')" >> "$GITHUB_ENV"
       - uses: kne-union/actions-deploy-static-data@master
         with:
           repository: ${{inputs.repository}}
           token: ${{ secrets.ADMIN_TOKEN }}
-          name: ${{context.repository.name}}
+          name: ${{env.STATIC_DEPLOY_NAME}}

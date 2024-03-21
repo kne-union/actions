@@ -43,7 +43,6 @@ jobs:
     secrets: inherit
     with:
       artifact: example-dist
-      PROJECT_DIR: ./example
       APP_ID: ${{inputs.APP_ID}}
       PRIVATE_KEY_NAME: ${{inputs.PRIVATE_KEY_NAME}}
   publish-npm:

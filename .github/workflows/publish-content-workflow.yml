@@ -1,9 +1,5 @@
 on:
   workflow_call:
-    inputs:
-      repository:
-        required: false
-        type: string
 jobs:
   publish-content:
     runs-on: ubuntu-latest

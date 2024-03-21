@@ -1,0 +1,50 @@
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+      APP_ID:
+        required: true
+        type: string
+    secrets:
+      PRIVATE_KEY:
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+      - run: npm i --legacy-peer-deps
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: |
+            ./dist
+            ./package.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-dist
+          path: |
+            ./example/dist
+            ./example/package.json
+            ./example
+  publish-miniprogram:
+    needs: build
+    uses: kne-union/actions/.github/workflows/publish-miniprogram-workflow.yml@master
+    secrets: inherit
+    with:
+      PROJECT_DIR: ./example
+      APP_ID: ${{inputs.APP_ID}}
+  publish-npm:
+    needs: build
+    uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+      artifact: example-dist
+

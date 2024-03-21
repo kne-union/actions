@@ -1,0 +1,38 @@
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+      artifact:
+        required: true
+        type: string
+        default:
+          build-dist
+      PROJECT_DIR:
+        required: true
+        type: string
+        default: ./
+      APP_ID:
+        required: true
+        type: string
+    secrets:
+      PRIVATE_KEY:
+        required: true
+jobs:
+  publish-miniprogram:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{inputs.artifact}}
+          path: ./
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+      - run: npx @kne/miniprogram-tools
+        env:
+          PROJECT_DIR: ${{inputs.PROJECT_DIR}}
+          APP_ID: ${{inputs.APP_ID}}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+

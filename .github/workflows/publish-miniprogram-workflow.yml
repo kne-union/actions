@@ -16,9 +16,9 @@ on:
       APP_ID:
         required: true
         type: string
-    secrets:
       PRIVATE_KEY:
         required: true
+        type: string
 jobs:
   publish-miniprogram:
     runs-on: ubuntu-latest

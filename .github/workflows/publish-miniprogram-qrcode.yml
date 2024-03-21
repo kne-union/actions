@@ -4,9 +4,9 @@ on:
       APP_ID:
         required: true
         type: string
-    secrets:
       TOKEN_SECRET:
         required: true
+        type: string
 
 jobs:
   miniprogram-qrcode:

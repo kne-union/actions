@@ -7,6 +7,12 @@ on:
       APP_ID:
         required: true
         type: string
+      TOKEN_SECRET:
+        required: true
+        type: string
+      PRIVATE_KEY:
+        required: true
+        type: string
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,6 +43,7 @@ jobs:
     with:
       PROJECT_DIR: ./example
       APP_ID: ${{inputs.APP_ID}}
+      PRIVATE_KEY: ${{inputs.PRIVATE_KEY}}
   publish-npm:
     needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
@@ -50,6 +57,7 @@ jobs:
     secrets: inherit
     with:
       APP_ID: ${{inputs.APP_ID}}
+      TOKEN_SECRET: ${{inputs.TOKEN_SECRET}}
   release:
     needs: publish-npm
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master

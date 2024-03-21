@@ -35,6 +35,7 @@ jobs:
           name: example-dist
           path: |
             ./example/dist
+            ./example/package.json
             ./package.json
             ./example/project.config.json
   publish-miniprogram:
@@ -43,6 +44,7 @@ jobs:
     secrets: inherit
     with:
       artifact: example-dist
+      PROJECT_DIR: ./example
       APP_ID: ${{inputs.APP_ID}}
       PRIVATE_KEY_NAME: ${{inputs.PRIVATE_KEY_NAME}}
   publish-npm:

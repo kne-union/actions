@@ -22,6 +22,7 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm i --legacy-peer-deps
+      - run: npm run init
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:

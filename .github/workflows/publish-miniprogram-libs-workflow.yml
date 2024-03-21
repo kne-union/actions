@@ -35,7 +35,7 @@ jobs:
           name: example-dist
           path: |
             ./example/dist
-            ./example/package.json
+            ./package.json
             ./example/project.config.json
   publish-miniprogram:
     needs: build

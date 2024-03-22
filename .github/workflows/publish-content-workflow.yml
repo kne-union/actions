@@ -20,4 +20,4 @@ jobs:
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit
     with:
-      package_name: @kne-components/${{env.STATIC_DEPLOY_NAME}}
+      package_name: '@kne-components/${{env.STATIC_DEPLOY_NAME}}'

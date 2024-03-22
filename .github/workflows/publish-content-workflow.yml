@@ -42,6 +42,7 @@ jobs:
           token: ${{ secrets.ADMIN_TOKEN }}
           name: ${{needs.get-name.outputs.name}}
   publish-npm:
+    if: github.inputs.publish-to-npm == true
     needs: [ get-name,build ]
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit

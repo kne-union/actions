@@ -29,7 +29,7 @@ jobs:
             eval $line
           done
           rm -f ./build/download-shell.sh
-      - run: echo '{"name":"@kne-components/${{needs.get-name.outputs.name}}","version":"0.0.1"}' > ./build/package.json
+      - run: echo '{"name":"@kne-components/${{needs.get-name.outputs.name}}","version":"0.0.1","files":["assets","manifest-pages"]}' > ./build/package.json
       - run: cd ./build && npx @kne/npm-tools nextPatchVersion
       - uses: actions/upload-artifact@v4
         with:
@@ -49,7 +49,7 @@ jobs:
           token: ${{ secrets.ADMIN_TOKEN }}
           name: ${{needs.get-name.outputs.name}}
   publish-npm:
-    if: github.inputs.publish-to-npm == true
+    if: ${{inputs.publish-to-npm}} == true
     needs: [ get-name,build ]
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
     secrets: inherit

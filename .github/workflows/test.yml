@@ -1,0 +1,9 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl 'https://www.plantuml.com/plantuml/svg/JOvH2i0W34F_FONVWdTmHt5QHcLjHRlxhye-zfL70adIr3pqeTkbJOHSANSN_54KXLq8dgL2cujkFBSE8568HQWB0-lVx4CQ55rE4LPB5relMdADJ76tk0IszAqjjWyl'

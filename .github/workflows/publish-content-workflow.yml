@@ -21,9 +21,13 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
       - name: manifest 🏗️
-        run: |
-          npx @kne/blog-maker
-          ./build/download-shell.sh
+        run: npx @kne/blog-maker
+      - run: |
+          cat ./build/download-shell.sh | while read line
+          do
+            echo $line
+            eval $line
+          done
       - run: echo '{"name":"@kne-components/${{needs.get-name.outputs.name}}","version":"0.0.1"}' > ./build/package.json
       - run: cd ./build && npx @kne/npm-tools nextPatchVersion
       - uses: actions/upload-artifact@v4

@@ -29,7 +29,7 @@ jobs:
             eval $line
           done
           rm -f ./build/download-shell.sh
-      - run: echo '{"name":"@kne-components/${{needs.get-name.outputs.name}}","version":"0.0.1","files":["assets","manifest-pages"]}' > ./build/package.json
+      - run: echo '{"name":"@kne-components/${{needs.get-name.outputs.name}}","version":"0.0.1","files":["assets","manifest-pages","manifest.json"]}' > ./build/package.json
       - run: cd ./build && npx @kne/npm-tools nextPatchVersion
       - uses: actions/upload-artifact@v4
         with:

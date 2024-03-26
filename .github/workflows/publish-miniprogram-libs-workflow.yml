@@ -30,6 +30,7 @@ jobs:
           path: |
             ./dist
             ./package.json
+            ./README.md
       - uses: actions/upload-artifact@v4
         with:
           name: example-dist

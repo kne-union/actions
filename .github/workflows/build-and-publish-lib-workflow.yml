@@ -1,0 +1,29 @@
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+jobs:
+  build-lib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+      - run: npm i --legacy-peer-deps
+      - run: npm run build:lib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: |
+            ./dist
+            ./package.json
+  publish-lib-npm:
+    needs: build-lib
+    uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+

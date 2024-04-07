@@ -8,58 +8,17 @@ on:
         required: true
         type: string
 jobs:
-  build-lib:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: https://registry.npmjs.org/
-      - run: npm i --legacy-peer-deps
-      - run: npm run build:lib
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-dist
-          path: |
-            ./dist
-            ./package.json
-  publish-npm:
-    needs: build-lib
-    uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
+  build-and-publish-lib:
+    uses: kne-union/actions/.github/workflows/build-and-publish-lib-workflow.yml@master
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-  build-example:
+  build-and-publish--example:
     needs: build-lib
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: build-dist
-          path: ./
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: https://registry.npmjs.org/
-      - run: npm i --legacy-peer-deps
-      - run: |
-          npm run init-example
-          npm run build:example
-          rm -rf ./build && rm -rf ./package.json && mkdir ./build 
-          cp -r ./example/build/* ./build && cp ./example/package.json ./
-      - uses: actions/upload-artifact@v4
-        with:
-          name: example-dist
-          path: |
-            ./build
-            ./package.json
-  publish-example:
-    needs: build-example
-    uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
+    uses: kne-union/actions/.github/workflows/build-and-publish-example-workflow.yml@master
     secrets: inherit
     with:
       package_name: ${{inputs.example_package_name}}
-      artifact: example-dist
   sync-static-data:
     runs-on: ubuntu-latest
     needs: publish-example

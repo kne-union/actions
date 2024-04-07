@@ -1,0 +1,37 @@
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+jobs:
+  build-example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: ./
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+      - run: npm i --legacy-peer-deps
+      - run: |
+          npm run init-example
+          npm run build:example
+          rm -rf ./build && rm -rf ./package.json && mkdir ./build 
+          cp -r ./example/build/* ./build && cp ./example/package.json ./
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-dist
+          path: |
+            ./build
+            ./package.json
+  publish-example:
+    needs: build-example
+    uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+      artifact: example-dist

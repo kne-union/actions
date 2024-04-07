@@ -18,7 +18,7 @@ jobs:
         with:
           token: ${{ secrets.ADMIN_TOKEN }}
   release:
-    needs: publish-npm
+    needs: build-and-publish-lib
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master
     secrets: inherit
     with:

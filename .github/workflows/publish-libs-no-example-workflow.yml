@@ -1,0 +1,27 @@
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+jobs:
+  build-and-publish-lib:
+    uses: kne-union/actions/.github/workflows/build-and-publish-lib-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+  sync-static-data:
+    runs-on: ubuntu-latest
+    needs: publish-example
+    steps:
+      - uses: kne-union/actions-manifest@master
+        with:
+          token: ${{ secrets.ADMIN_TOKEN }}
+  release:
+    needs: publish-npm
+    uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: ${{inputs.package_name}}
+
+

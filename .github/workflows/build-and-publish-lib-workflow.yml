@@ -19,6 +19,7 @@ jobs:
           name: build-dist
           path: |
             ./
+            !./.git
             !./src
             !./node_modules
             !./.github

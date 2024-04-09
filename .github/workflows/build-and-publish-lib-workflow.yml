@@ -18,8 +18,11 @@ jobs:
         with:
           name: build-dist
           path: |
-            ./dist
-            ./package.json
+            !./src
+            !./node_modules
+            !./.github
+            !./package-lock.json
+            !./doc
   publish-lib-npm:
     needs: build-lib
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master

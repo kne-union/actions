@@ -31,3 +31,12 @@ jobs:
     steps:
       - name: Sync To Cnpm
         run: npx cnpm sync ${{inputs.package_name}}
+  sync-uc:
+    runs-on: ubuntu-latest
+    needs: publish
+    timeout-minutes: 2
+    continue-on-error: true
+    steps:
+      - name: Sync To UC
+        run: |
+          curl --header "Content-Type: application/json" --request POST --data "{}" ${{secrets.SYNC_WEB_HOOK}}

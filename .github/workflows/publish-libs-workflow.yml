@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Sync To UC
         run: |
-          curl --header "Content-Type: application/json" --request POST --data "{\"PACKAGE_NAME\":\"${{inputs.package_name}}\"}" ${{secrets.SYNC_WEB_HOOK}}
+          curl --header "Content-Type: application/json" --request POST --data "{\"PACKAGE_NAME\":\"${{inputs.example_package_name}}\"}" ${{secrets.SYNC_WEB_HOOK}}
   release:
     needs: build-and-publish-lib
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master

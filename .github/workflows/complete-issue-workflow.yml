@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
-      - run: echo "ISSUE_NUMBER=$(echo $BRANCH_NAME | sed 's/^issue-\(.*\)-.*$/\1/')" >> "$GITHUB_ENV"
       - run: echo "ISSUE_NUMBER=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/^issue-\(.*\)-.*$/\1/')"  >> "$GITHUB_ENV"
       - name: Check if ISSUE_NUMBER is a number
         id: check_number
@@ -25,5 +23,6 @@ jobs:
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           comment: Auto-closing issue
+      - run: BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
       - name: Delete source branch
         run: git push origin --delete $BRANCH_NAME

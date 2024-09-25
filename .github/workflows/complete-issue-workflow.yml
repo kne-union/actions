@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "ISSUE_NUMBER=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/^issue-\(.*\)-.*$/\1/')"  >> "$GITHUB_ENV"
+      - run: echo "ISSUE_NUMBER=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/^issue-\([0-9]*\).*/\1/')"  >> "$GITHUB_ENV"
       - name: Check if ISSUE_NUMBER is a number
         id: check_number
         run: |

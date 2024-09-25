@@ -23,6 +23,7 @@ jobs:
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           comment: Auto-closing issue
-      - run: BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
       - name: Delete source branch
-        run: git push origin --delete $BRANCH_NAME
+        run: |
+          BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
+          git push origin --delete $BRANCH_NAME

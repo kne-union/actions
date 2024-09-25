@@ -24,6 +24,7 @@ jobs:
           issue-number: ${{ env.ISSUE_NUMBER }}
           comment: Auto-closing issue
       - name: Delete source branch
+        if: steps.check_number.outputs.is_number == 'true'
         run: |
           BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
           git push origin --delete $BRANCH_NAME

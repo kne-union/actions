@@ -53,8 +53,6 @@ jobs:
     needs: release
     steps:
       - uses: actions/checkout@v4
-      - uses: imajeetyadav/delete-merged-branches@main
-        with:
-          branch: master
+      - uses: pcvg/remove-merged-branches@main
 
 

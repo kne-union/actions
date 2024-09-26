@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: echo "BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')"  >> "$GITHUB_ENV"
       - run: echo "ISSUE_NUMBER=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/^issue-\([0-9]*\).*/\1/')"  >> "$GITHUB_ENV"
       - name: Check if ISSUE_NUMBER is a number
         id: check_number
@@ -19,13 +20,16 @@ jobs:
           else
             echo "is_number=false"
           fi
+      - name: Create Tag
+        if: steps.check_number.outputs.is_number == 'true'
+        uses: negz/create-tag@v1
+        with:
+          version: ${{ env.BRANCH_NAME }}
+          message: 'by complete issue action'
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete source branch and commit tag
         if: steps.check_number.outputs.is_number == 'true'
-        run: |
-          BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
-          git tag "v$BRANCH_NAME"
-          git push origin --tags
-          git push origin --delete $BRANCH_NAME
+        run: git push origin --delete ${{env.BRANCH_NAME}}
       - name: Close Issue
         if: steps.check_number.outputs.is_number == 'true'
         uses: peter-evans/close-issue@v3

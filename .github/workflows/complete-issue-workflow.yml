@@ -24,13 +24,9 @@ jobs:
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           comment: Auto-closing issue
-      - name: Tag commit
-        if: steps.check_number.outputs.is_number == 'true'
-        run: |
-          git tag -a ${{ github.ref }} -m "Tag created for ${{ github.ref }}"
-          git push origin ${{ github.ref }}
-      - name: Delete source branch
+      - name: Delete source branch and commit tag
         if: steps.check_number.outputs.is_number == 'true'
         run: |
           BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
+          git tag -a $BRANCH_NAME -m "Tag created for $BRANCH_NAME"
           git push origin --delete $BRANCH_NAME

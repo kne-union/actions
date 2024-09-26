@@ -24,7 +24,7 @@ jobs:
         run: |
           BRANCH_NAME=$(echo "${{ inputs.branch_name || github.event.pull_request.head.ref }}" | tr '[:upper:]' '[:lower:]')
           git tag "$BRANCH_NAME"
-          git push origin "$BRANCH_NAME"
+          git push origin
           git push origin --delete $BRANCH_NAME
       - name: Close Issue
         if: steps.check_number.outputs.is_number == 'true'

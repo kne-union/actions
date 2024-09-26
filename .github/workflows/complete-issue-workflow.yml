@@ -15,14 +15,20 @@ jobs:
           str="${{ env.ISSUE_NUMBER }}";
           if [[ "$str" =~ ^[0-9]+$ ]]; then
             echo "::set-output name=is_number::true"
+            echo "is_number=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_number::false"
+            echo "is_number=false"
           fi
       - name: Close Issue
         uses: peter-evans/close-issue@v3
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           comment: Auto-closing issue
+      - name: Tag commit
+        if: steps.check_number.outputs.is_number == 'true'
+        run: |
+          git tag -a ${{ github.ref }} -m "Tag created for ${{ github.ref }}"
+          git push origin ${{ github.ref }}
       - name: Delete source branch
         if: steps.check_number.outputs.is_number == 'true'
         run: |

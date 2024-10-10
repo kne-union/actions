@@ -15,8 +15,8 @@ jobs:
           path: |
             ./
             !.git
-            !.husky
-            !.github
+            !./.husky
+            !./.github
   publish-npm:
     needs: checkout
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master

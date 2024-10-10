@@ -16,6 +16,9 @@ jobs:
           path: |
             ./
             !.git
+            !${{ github.workspace }}/.gitignore
+            !${{ github.workspace }}/.gitattributes
+            !${{ github.workspace }}/.prettierrc
             !${{ github.workspace }}/.husky
             !${{ github.workspace }}/.github
   publish-npm:

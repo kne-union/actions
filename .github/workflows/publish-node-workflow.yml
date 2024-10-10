@@ -15,8 +15,8 @@ jobs:
           path: |
             ./
             !.git
-            !./.husky
-            !./.github
+            !${{ github.workspace }}/.husky
+            !${{ github.workspace }}/.github
   publish-npm:
     needs: checkout
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master

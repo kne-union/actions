@@ -22,7 +22,7 @@ jobs:
       - name: Publish Npm
         env:
           NODE_AUTH_TOKEN: ${{secrets.KNE_PACKAGE_PUBLISH}}
-        run: npm publish --access=public
+        run: npm publish --provenance --access=public
   sync-cnpm:
     runs-on: ubuntu-latest
     needs: publish

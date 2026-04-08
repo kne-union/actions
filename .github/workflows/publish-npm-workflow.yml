@@ -18,9 +18,10 @@ jobs:
         with:
           name: ${{inputs.artifact}}
           path: ./
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           registry-url: https://registry.npmjs.org/
+          node-version: 24
       - name: Publish Npm
         env:
           NODE_AUTH_TOKEN: ${{secrets.KNE_PACKAGE_PUBLISH}}

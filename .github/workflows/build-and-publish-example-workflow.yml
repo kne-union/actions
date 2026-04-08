@@ -13,9 +13,10 @@ jobs:
         with:
           name: build-dist
           path: ./
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           registry-url: https://registry.npmjs.org/
+          node-version: 24
       - run: npm i --legacy-peer-deps
       - run: |
           npm run init-example

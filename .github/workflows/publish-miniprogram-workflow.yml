@@ -20,11 +20,11 @@ jobs:
   publish-miniprogram:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: ${{inputs.artifact}}
           path: ./
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           registry-url: https://registry.npmjs.org/
       - run: npx @kne/miniprogram-tools

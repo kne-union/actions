@@ -17,7 +17,7 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
           node-version: 24
-      - run: npm i --legacy-peer-deps
+      - run: npm i 
       - run: |
           npm run init-example
           npm run build:example

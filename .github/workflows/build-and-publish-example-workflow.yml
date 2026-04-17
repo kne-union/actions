@@ -8,8 +8,8 @@ jobs:
   build-example:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
         with:
           name: build-dist
           path: ./
@@ -23,7 +23,7 @@ jobs:
           npm run build:example
           rm -rf ./build && rm -rf ./package.json && mkdir ./build 
           cp -r ./example/build/* ./build && cp ./example/package.json ./
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: example-dist
           path: |
@@ -35,7 +35,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: example-dist
           path: ./

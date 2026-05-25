@@ -8,9 +8,13 @@ on:
         required: false
         type: string
         default: build-dist
+permissions:
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       id-token: write
     steps:
@@ -51,5 +55,4 @@ jobs:
     continue-on-error: true
     steps:
       - name: Sync To Cnpm
-        continue-on-error: true
         run: npx cnpm sync ${{inputs.package_name}}

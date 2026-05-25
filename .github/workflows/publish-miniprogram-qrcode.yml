@@ -8,6 +8,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   miniprogram-qrcode:
     runs-on: ubuntu-latest
@@ -17,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           registry-url: https://registry.npmjs.org/
+          node-version: 24
       - run: npx @kne/miniprogram-tools qrcode
         env:
           APP_ID: ${{inputs.APP_ID}}

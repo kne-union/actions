@@ -4,6 +4,10 @@ on:
       package_name:
         required: true
         type: string
+      artifact:
+        required: false
+        type: string
+        default: build-dist
 permissions:
   contents: write
 
@@ -12,15 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
-      - name: Get version from npm or package.json
+      - uses: actions/download-artifact@v7
+        with:
+          name: ${{inputs.artifact}}
+          path: ./
+      - name: Get version from package.json
         run: |
-          VERSION=$(npx @kne/npm-tools latestVersion ${{inputs.package_name}} 2>/dev/null | tail -1 || true)
-          if [ -z "$VERSION" ]; then
-            VERSION=$(node -p "require('./package.json').version")
-            echo "Package not found on npm, using version from package.json: $VERSION"
-          fi
+          VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{env.VERSION}}
+          skipIfReleaseExists: true

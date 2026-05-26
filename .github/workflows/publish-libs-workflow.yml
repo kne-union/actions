@@ -7,13 +7,20 @@ on:
       example_package_name:
         required: true
         type: string
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   build-and-publish-lib:
     uses: kne-union/actions/.github/workflows/build-and-publish-lib-workflow.yml@master
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-  build-and-publish--example:
+  build-and-publish-example:
     needs: build-and-publish-lib
     uses: kne-union/actions/.github/workflows/build-and-publish-example-workflow.yml@master
     secrets: inherit
@@ -21,7 +28,8 @@ jobs:
       package_name: ${{inputs.example_package_name}}
   sync-static-data:
     runs-on: ubuntu-latest
-    needs: build-and-publish--example
+    needs: build-and-publish-example
+    timeout-minutes: 5
     steps:
       - uses: kne-union/actions-manifest@master
         with:
@@ -41,5 +49,3 @@ jobs:
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-
-

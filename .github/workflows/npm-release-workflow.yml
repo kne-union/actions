@@ -4,12 +4,23 @@ on:
       package_name:
         required: true
         type: string
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - run: echo "VERSION=$(npx @kne/npm-tools latestVersion ${{inputs.package_name}} | tail -1)" >> "$GITHUB_ENV"
+      - name: Get version from npm or package.json
+        run: |
+          VERSION=$(npx @kne/npm-tools latestVersion ${{inputs.package_name}} 2>/dev/null | tail -1 || true)
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./package.json').version")
+            echo "Package not found on npm, using version from package.json: $VERSION"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{env.VERSION}}

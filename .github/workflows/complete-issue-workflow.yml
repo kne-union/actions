@@ -1,8 +1,12 @@
 on:
   workflow_call:
+permissions:
+  contents: write
+
 jobs:
   complete-issue:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - run: echo "BRANCH_NAME=$(echo "${{ github.event.pull_request.head.ref }}")"  >> "$GITHUB_ENV"

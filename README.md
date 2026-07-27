@@ -60,7 +60,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 
 #### `publish-remote-components-workflow`
 
-远程组件发布：构建 → 部署 GitHub Pages → 发布 npm → 同步静态数据 → 同步 UC → 创建 Release。
+远程组件发布：构建 → 部署 GitHub Pages → 发布 npm（含 `README.md`）→ 同步静态数据 → 同步 UC → 创建 Release。
 
 | 输入参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|

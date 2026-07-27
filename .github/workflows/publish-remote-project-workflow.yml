@@ -42,6 +42,7 @@ jobs:
           path: |
             ./build
             ./package.json
+            ./README.md
   publish-npm:
     needs: build
     uses: kne-union/actions/.github/workflows/publish-npm-workflow.yml@master

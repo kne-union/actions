@@ -1,6 +1,11 @@
 on:
   workflow_call:
     inputs:
+      run_test:
+        description: '为 false 时直接成功退出（供 publish-node 默认跳过测试）'
+        required: false
+        type: boolean
+        default: true
       node-versions:
         description: 'JSON 数组，Node 版本矩阵，例如 ["18","20","22"]'
         required: false
@@ -18,7 +23,16 @@ on:
         default: 'npm test'
 
 jobs:
+  # 关闭测试时跑空成功 job，调用方 needs 得到 success 而非 skipped，避免 skip 传染
+  skip:
+    if: ${{ !inputs.run_test }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - run: echo "run_test=false, skip tests"
+
   test:
+    if: ${{ inputs.run_test }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:

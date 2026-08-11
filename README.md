@@ -93,7 +93,7 @@ Node 项目发布：可选测试 → 检出代码 → 发布 npm → 同步静�
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `package_name` | string | 是 | - | npm 包名 |
-| `run_test` | boolean | 否 | `false` | 是否在发布前调用 `node-test`（默认关闭，其它包不受影响） |
+| `run_test` | boolean | 否 | `false` | 是否在发布前真正执行测试（默认关闭；关闭时 `node-test` 仍返回 success，下游正常发布） |
 | `node-versions` | string | 否 | `'["18","20","22"]'` | 传给 `node-test` 的版本矩阵 |
 | `install-command` | string | 否 | `npm install` | 传给 `node-test`（无 lock 勿用 `npm ci`） |
 | `test-command` | string | 否 | `npm test` | 传给 `node-test` |
@@ -150,6 +150,7 @@ Node 项目测试：checkout → setup-node（版本矩阵）→ 安装依赖 �
 
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
+| `run_test` | boolean | 否 | `true` | 为 `false` 时跑空成功 job（不执行测试），供 `publish-node` 跳过测试且不触发 skip 传染 |
 | `node-versions` | string | 否 | `'["18","20","22"]'` | JSON 数组，Node 版本矩阵 |
 | `install-command` | string | 否 | `npm install` | 依赖安装命令（默认不要求 lock；有 lock 可传 `npm ci`） |
 | `test-command` | string | 否 | `npm test` | 测试命令 |

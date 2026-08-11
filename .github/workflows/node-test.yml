@@ -1,0 +1,37 @@
+on:
+  workflow_call:
+    inputs:
+      node-versions:
+        description: 'JSON 数组，Node 版本矩阵，例如 ["18","20","22"]'
+        required: false
+        type: string
+        default: '["18","20","22"]'
+      install-command:
+        description: '依赖安装命令'
+        required: false
+        type: string
+        default: 'npm ci'
+      test-command:
+        description: '测试命令'
+        required: false
+        type: string
+        default: 'npm test'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ${{ fromJson(inputs.node-versions) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - name: Install dependencies
+        run: ${{ inputs.install-command }}
+      - name: Run tests
+        run: ${{ inputs.test-command }}

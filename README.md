@@ -15,7 +15,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 │  publish-remote-components-workflow 构建 + GitHub Pages + npm + UC同步         │
 │  publish-remote-project-workflow    构建 + npm + 静态数据 + UC同步 + Release   │
 │  publish-miniprogram-libs-workflow  构建 + 小程序发布 + npm + 二维码 + Release │
-│  publish-node-workflow              检出 + npm + 静态数据 + Release            │
+│  publish-node-workflow              可选测试 + 检出 + npm + 静态数据 + Release │
 │  publish-content-workflow           内容生成 + 静态部署 + 可选npm              │
 │  complete-issue-workflow            PR合并后关闭Issue + 删除分支               │
 └──────────────────────────────────┬──────────────────────────────────┘
@@ -30,6 +30,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 ┌──────────────────────────────────▼──────────────────────────────────┐
 │                          基础层                                     │
 ├─────────────────────────────────────────────────────────────────────┤
+│  node-test                          Node 多版本 npm test             │
 │  publish-npm-workflow               npm发布 + cnpm同步              │
 │  npm-release-workflow               GitHub Release创建              │
 │  publish-miniprogram-workflow       微信小程序上传                   │
@@ -87,11 +88,27 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 
 #### `publish-node-workflow`
 
-Node 项目发布：检出代码 → 发布 npm → 同步静态数据 → 创建 Release。
+Node 项目发布：可选测试 → 检出代码 → 发布 npm → 同步静态数据 → 创建 Release。
 
-| 输入参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `package_name` | string | 是 | npm 包名 |
+| 输入参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `package_name` | string | 是 | - | npm 包名 |
+| `run_test` | boolean | 否 | `false` | 是否在发布前调用 `node-test`（默认关闭，其它包不受影响） |
+| `node-versions` | string | 否 | `'["18","20","22"]'` | 传给 `node-test` 的版本矩阵 |
+| `install-command` | string | 否 | `npm ci` | 传给 `node-test` |
+| `test-command` | string | 否 | `npm test` | 传给 `node-test` |
+
+开启测试的调用示例：
+
+```yaml
+jobs:
+  node-npm:
+    uses: kne-union/actions/.github/workflows/publish-node-workflow.yml@master
+    secrets: inherit
+    with:
+      package_name: '@kne/your-package'
+      run_test: true
+```
 
 #### `publish-content-workflow`
 
@@ -126,6 +143,30 @@ PR 合并后自动处理：从分支名（格式 `issue-{数字}`）提取 Issue
 | `package_name` | string | 是 | 示例项目 npm 包名 |
 
 ### 基础层
+
+#### `node-test`
+
+Node 项目测试：checkout → setup-node（版本矩阵）→ 安装依赖 → 跑测试。供各业务仓库以 `uses` 引用，无需在业务仓写完整测试步骤。
+
+| 输入参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `node-versions` | string | 否 | `'["18","20","22"]'` | JSON 数组，Node 版本矩阵 |
+| `install-command` | string | 否 | `npm ci` | 依赖安装命令 |
+| `test-command` | string | 否 | `npm test` | 测试命令 |
+
+业务仓库引用示例：
+
+```yaml
+name: CI
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  test:
+    uses: kne-union/actions/.github/workflows/node-test.yml@master
+```
 
 #### `publish-npm-workflow`
 

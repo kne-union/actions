@@ -4,12 +4,39 @@ on:
       package_name:
         required: true
         type: string
+      run_test:
+        description: '发布前是否跑 node-test（默认关闭，避免影响现有包）'
+        required: false
+        type: boolean
+        default: false
+      node-versions:
+        description: '传给 node-test 的 Node 版本矩阵 JSON'
+        required: false
+        type: string
+        default: '["18","20","22"]'
+      install-command:
+        required: false
+        type: string
+        default: 'npm ci'
+      test-command:
+        required: false
+        type: string
+        default: 'npm test'
 permissions:
   contents: write
   id-token: write
 
 jobs:
+  test:
+    if: ${{ inputs.run_test }}
+    uses: kne-union/actions/.github/workflows/node-test.yml@master
+    with:
+      node-versions: ${{ inputs.node-versions }}
+      install-command: ${{ inputs.install-command }}
+      test-command: ${{ inputs.test-command }}
   checkout:
+    needs: [test]
+    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

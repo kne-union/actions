@@ -95,7 +95,7 @@ Node 项目发布：可选测试 → 检出代码 → 发布 npm → 同步静�
 | `package_name` | string | 是 | - | npm 包名 |
 | `run_test` | boolean | 否 | `false` | 是否在发布前调用 `node-test`（默认关闭，其它包不受影响） |
 | `node-versions` | string | 否 | `'["18","20","22"]'` | 传给 `node-test` 的版本矩阵 |
-| `install-command` | string | 否 | `npm ci` | 传给 `node-test` |
+| `install-command` | string | 否 | `npm install` | 传给 `node-test`（无 lock 勿用 `npm ci`） |
 | `test-command` | string | 否 | `npm test` | 传给 `node-test` |
 
 开启测试的调用示例：
@@ -151,7 +151,7 @@ Node 项目测试：checkout → setup-node（版本矩阵）→ 安装依赖 �
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `node-versions` | string | 否 | `'["18","20","22"]'` | JSON 数组，Node 版本矩阵 |
-| `install-command` | string | 否 | `npm ci` | 依赖安装命令 |
+| `install-command` | string | 否 | `npm install` | 依赖安装命令（默认不要求 lock；有 lock 可传 `npm ci`） |
 | `test-command` | string | 否 | `npm test` | 测试命令 |
 
 业务仓库引用示例：

@@ -7,10 +7,10 @@ on:
         type: string
         default: '["18","20","22"]'
       install-command:
-        description: '依赖安装命令'
+        description: '依赖安装命令（无 lock 文件时用 npm install，勿用 npm ci）'
         required: false
         type: string
-        default: 'npm ci'
+        default: 'npm install'
       test-command:
         description: '测试命令'
         required: false
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          # 不启用 cache: npm —— 许多包不提交 lock，cache 会直接失败
       - name: Install dependencies
         run: ${{ inputs.install-command }}
       - name: Run tests

@@ -15,9 +15,10 @@ on:
         type: string
         default: '["18","20","22"]'
       install-command:
+        description: '传给 node-test；无 lock 时用 npm install'
         required: false
         type: string
-        default: 'npm ci'
+        default: 'npm install'
       test-command:
         required: false
         type: string

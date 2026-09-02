@@ -31,7 +31,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 │                          基础层                                     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  node-test                          Node 多版本 npm test             │
-│  publish-npm-workflow               npm发布 + cnpm同步              │
+│  publish-npm-workflow               npm发布 + cnpm同步 + 开发者文档同步  │
 │  npm-release-workflow               GitHub Release创建              │
 │  publish-miniprogram-workflow       微信小程序上传                   │
 │  publish-miniprogram-qrcode         小程序二维码生成 + 静态部署      │
@@ -171,12 +171,14 @@ jobs:
 
 #### `publish-npm-workflow`
 
-发布到 npm 并同步 cnpm。
+发布到 npm，同步 cnpm，并在配置了 Open API 密钥时触发 [developer-document](https://develop.leapin-ai.com/) 的 NPM 包同步（`POST /api/v1/open-api/sync/npm-package`）。
 
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `package_name` | string | 是 | - | npm 包名 |
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
+
+**Developer Document 同步（可选）**：在组织/仓库 Secrets 中配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` 与 `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET`（在 develop.leapin-ai.com 管理后台「密钥管理」创建）后自动启用；未配置则跳过。签名由 `npx @kne/npm-tools generateOpenApiSignature` 生成。API 根地址默认 `https://develop.leapin-ai.com/api/v1`，可通过仓库 Variable `DEVELOPER_DOCUMENT_SYNC_URL` 或 Secret `DEVELOPER_DOCUMENT_SYNC_URL` 覆盖；签名有效期秒数可通过 Variable `DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS` 调整（默认 `300`）。
 
 #### `npm-release-workflow`
 
@@ -225,6 +227,9 @@ jobs:
 | Secret | 说明 | 使用的工作流 |
 |---|---|---|
 | `KNE_PACKAGE_PUBLISH` | npm 发布 Token | `publish-npm-workflow` |
+| `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` | developer-document Open API App ID | `publish-npm-workflow`（可选，与 App Secret 同时配置才触发同步） |
+| `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET` | developer-document Open API App Secret | `publish-npm-workflow`（可选） |
+| `DEVELOPER_DOCUMENT_SYNC_URL` | developer-document API 根地址（如 `https://develop.leapin-ai.com/api/v1`） | `publish-npm-workflow`（可选 Secret；也可用同名 Repository Variable） |
 | `ADMIN_TOKEN` | 静态数据部署 Token | 涉及 manifest 同步的多个工作流 |
 | `SYNC_WEB_HOOK` | UC 同步 Webhook URL | `publish-libs-workflow`, `publish-remote-project-workflow` |
 | `{PRIVATE_KEY_NAME}` | 小程序上传私钥（动态命名） | `publish-miniprogram-workflow` |

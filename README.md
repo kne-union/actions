@@ -182,9 +182,7 @@ jobs:
 | `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
 | `developer_document_package_type` | string | 否 | `other` | 自动创建时写入的包类型：`frontend` / `nodejs` / `engineering` / `miniprogram` / `prompts` / `other`（仅 `npm-package`） |
 
-**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env`；sync 前会 `npm view` 短轮询。普通 npm 包走 `/open-api/sync/npm-package`（带 `type`）；`@kne-components/*` 或显式 `remote-component` 走远程组件接口。example 包 `developer_document_sync: false`。
-
-编排默认 type：`build-and-publish-lib` → `frontend`；`publish-node` → `nodejs`（可覆盖为 `engineering`）；`publish-miniprogram-libs` → `miniprogram`；`publish-content` → `remote-component`。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。普通 npm 包在 publish 后同步；**远程组件/远程项目**在 CDN（sync-static + sync-uc）就绪并轮询 README 后再同步，避免索引读到 404。
 
 #### `npm-release-workflow`
 

@@ -23,6 +23,10 @@ on:
         type: string
         default: other
         description: 自动创建 npm 包时的 type（frontend/nodejs/engineering/miniprogram/prompts/other）；仅 npm-package 同步生效
+    outputs:
+      version:
+        description: 本次发布的 package.json version
+        value: ${{ jobs.publish.outputs.version }}
 permissions:
   contents: read
 

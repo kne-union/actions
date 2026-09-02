@@ -85,15 +85,21 @@ jobs:
             echo "DEVELOPER_DOCUMENT OpenAPI credentials not configured, skipping sync"
             exit 0
           fi
-          export HEADERS_JSON=$(npx -y @kne/npm-tools generateOpenApiSignature \
+          eval "$(npx -y @kne/npm-tools generateOpenApiSignature \
             --app-id "$OPENAPI_APP_ID" \
             --app-secret "$OPENAPI_APP_SECRET" \
-            --expire-seconds "$OPENAPI_EXPIRE_SECONDS")
+            --expire-seconds "$OPENAPI_EXPIRE_SECONDS")"
           node <<'NODE'
-          const headers = JSON.parse(process.env.HEADERS_JSON).headers;
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;
           const syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
+          const headers = {
+            'Content-Type': 'application/json',
+            'x-openapi-appid': process.env.OPENAPI_APP_ID,
+            'x-openapi-timestamp': process.env.OPENAPI_TIMESTAMP,
+            'x-openapi-expire': process.env.OPENAPI_EXPIRE,
+            'x-openapi-signature': process.env.OPENAPI_SIGNATURE
+          };
 
           let path;
           let body;
@@ -113,10 +119,7 @@ jobs:
 
           fetch(`${syncUrl}${path}`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...headers
-            },
+            headers,
             body: JSON.stringify(body)
           })
             .then(async response => {

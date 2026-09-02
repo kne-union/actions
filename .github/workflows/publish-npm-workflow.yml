@@ -13,6 +13,11 @@ on:
         type: string
         default: npm-package
         description: developer-document 同步类型：npm-package（普通 npm 包）或 remote-component（远程组件/远程项目）
+      developer_document_sync:
+        required: false
+        type: boolean
+        default: true
+        description: 是否同步 developer-document；example 等附属包发布应设为 false
 permissions:
   contents: read
 
@@ -65,30 +70,41 @@ jobs:
         timeout-minutes: 2
         run: timeout 100 npx cnpm sync ${{inputs.package_name}} || true
   sync-developer-document:
+    if: inputs.developer_document_sync
     runs-on: ubuntu-latest
     needs: publish
     continue-on-error: true
     timeout-minutes: 2
     steps:
+      - name: Generate Open API signature
+        id: sign
+        continue-on-error: true
+        env:
+          OPENAPI_APP_ID: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID }}
+          OPENAPI_APP_SECRET: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET }}
+          OPENAPI_EXPIRE_SECONDS: ${{ vars.DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS || '300' }}
+        run: |
+          if [ -z "$OPENAPI_APP_ID" ] || [ -z "$OPENAPI_APP_SECRET" ]; then
+            echo "DEVELOPER_DOCUMENT OpenAPI credentials not configured, skipping sync"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          npx -y @kne/npm-tools@0.1.65 generateOpenApiSignature \
+            --app-id "$OPENAPI_APP_ID" \
+            --app-secret "$OPENAPI_APP_SECRET" \
+            --expire-seconds "$OPENAPI_EXPIRE_SECONDS" \
+            --github-env
+          echo "skip=false" >> "$GITHUB_OUTPUT"
       - name: Sync To Developer Document
+        if: steps.sign.outputs.skip != 'true'
         continue-on-error: true
         env:
           SYNC_URL: ${{ vars.DEVELOPER_DOCUMENT_SYNC_URL || secrets.DEVELOPER_DOCUMENT_SYNC_URL || 'https://develop.leapin-ai.com/api/v1' }}
           OPENAPI_APP_ID: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID }}
-          OPENAPI_APP_SECRET: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET }}
-          OPENAPI_EXPIRE_SECONDS: ${{ vars.DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS || '300' }}
           PACKAGE_NAME: ${{ inputs.package_name }}
           PACKAGE_VERSION: ${{ needs.publish.outputs.version }}
           DEVELOPER_DOCUMENT_SYNC_TYPE: ${{ inputs.developer_document_sync_type }}
         run: |
-          if [ -z "$OPENAPI_APP_ID" ] || [ -z "$OPENAPI_APP_SECRET" ]; then
-            echo "DEVELOPER_DOCUMENT OpenAPI credentials not configured, skipping sync"
-            exit 0
-          fi
-          eval "$(npx -y @kne/npm-tools generateOpenApiSignature \
-            --app-id "$OPENAPI_APP_ID" \
-            --app-secret "$OPENAPI_APP_SECRET" \
-            --expire-seconds "$OPENAPI_EXPIRE_SECONDS")"
           node <<'NODE'
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;

@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       id-token: write
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
     steps:
       - uses: actions/download-artifact@v7
         with:
@@ -57,3 +59,52 @@ jobs:
         continue-on-error: true
         timeout-minutes: 2
         run: timeout 100 npx cnpm sync ${{inputs.package_name}} || true
+  sync-developer-document:
+    runs-on: ubuntu-latest
+    needs: publish
+    continue-on-error: true
+    if: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID != '' && secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET != '' }}
+    timeout-minutes: 2
+    steps:
+      - name: Sync To Developer Document
+        continue-on-error: true
+        env:
+          SYNC_URL: ${{ vars.DEVELOPER_DOCUMENT_SYNC_URL || secrets.DEVELOPER_DOCUMENT_SYNC_URL || 'https://develop.leapin-ai.com/api/v1' }}
+          OPENAPI_APP_ID: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID }}
+          OPENAPI_APP_SECRET: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET }}
+          OPENAPI_EXPIRE_SECONDS: ${{ vars.DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS || '300' }}
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          PACKAGE_VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          export HEADERS_JSON=$(npx -y @kne/npm-tools generateOpenApiSignature \
+            --app-id "$OPENAPI_APP_ID" \
+            --app-secret "$OPENAPI_APP_SECRET" \
+            --expire-seconds "$OPENAPI_EXPIRE_SECONDS")
+          node <<'NODE'
+          const headers = JSON.parse(process.env.HEADERS_JSON).headers;
+          const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
+          const body = { packageName: process.env.PACKAGE_NAME };
+          if (process.env.PACKAGE_VERSION) {
+            body.version = process.env.PACKAGE_VERSION;
+          }
+
+          fetch(`${syncUrl}/open-api/sync/npm-package`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...headers
+            },
+            body: JSON.stringify(body)
+          })
+            .then(async response => {
+              const text = await response.text();
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${text}`);
+              }
+              console.log(`Developer Document sync succeeded: ${text}`);
+            })
+            .catch(error => {
+              console.error(`Developer Document sync failed: ${error.message}`);
+              process.exit(1);
+            });
+          NODE

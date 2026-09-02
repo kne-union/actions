@@ -67,3 +67,4 @@ jobs:
     secrets: inherit
     with:
       package_name: '@kne-components/${{needs.get-name.outputs.name}}'
+      developer_document_sync_type: remote-component

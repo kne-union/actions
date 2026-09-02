@@ -112,10 +112,16 @@ jobs:
           DEVELOPER_DOCUMENT_PACKAGE_TYPE: ${{ inputs.developer_document_package_type }}
         run: |
           node <<'NODE'
+          const { execSync } = require('node:child_process');
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;
-          const syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
           const packageType = process.env.DEVELOPER_DOCUMENT_PACKAGE_TYPE || 'other';
+          let syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
+          // @kne-components/* 默认走远程组件同步
+          if (syncType === 'npm-package' && packageName.startsWith('@kne-components/')) {
+            syncType = 'remote-component';
+          }
+
           const headers = {
             'Content-Type': 'application/json',
             'x-openapi-appid': process.env.OPENAPI_APP_ID,
@@ -124,36 +130,55 @@ jobs:
             'x-openapi-signature': process.env.OPENAPI_SIGNATURE
           };
 
-          let path;
-          let body;
-          if (syncType === 'remote-component') {
-            const remote = packageName.includes('/')
-              ? packageName.split('/').slice(1).join('/')
-              : packageName.replace(/^@/, '');
-            path = '/open-api/sync/remote-component';
-            body = { remote, packageName };
-          } else {
-            path = '/open-api/sync/npm-package';
-            body = { packageName, type: packageType };
-            if (process.env.PACKAGE_VERSION) {
-              body.version = process.env.PACKAGE_VERSION;
-            }
-          }
-
-          fetch(`${syncUrl}${path}`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body)
-          })
-            .then(async response => {
-              const text = await response.text();
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${text}`);
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          const waitForNpm = async () => {
+            const delays = [2000, 5000, 8000, 10000];
+            for (let i = 0; i < delays.length; i += 1) {
+              try {
+                execSync(`npm view ${packageName} version`, { stdio: ['ignore', 'pipe', 'ignore'] });
+                return;
+              } catch (e) {
+                console.log(`npm view ${packageName} not ready, retry ${i + 1}/${delays.length}`);
+                await sleep(delays[i]);
               }
-              console.log(`Developer Document sync succeeded (${syncType}): ${text}`);
-            })
-            .catch(error => {
-              console.error(`Developer Document sync failed (${syncType}): ${error.message}`);
-              process.exit(1);
+            }
+            console.log(`npm view ${packageName} still not ready, continue sync anyway`);
+          };
+
+          (async () => {
+            await waitForNpm();
+
+            let path;
+            let body;
+            if (syncType === 'remote-component') {
+              const remote = packageName.includes('/')
+                ? packageName.split('/').slice(1).join('/')
+                : packageName.replace(/^@/, '');
+              path = '/open-api/sync/remote-component';
+              body = { remote, packageName };
+              if (process.env.PACKAGE_VERSION) {
+                body.version = process.env.PACKAGE_VERSION;
+              }
+            } else {
+              path = '/open-api/sync/npm-package';
+              body = { packageName, type: packageType };
+              if (process.env.PACKAGE_VERSION) {
+                body.version = process.env.PACKAGE_VERSION;
+              }
+            }
+
+            const response = await fetch(`${syncUrl}${path}`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(body)
             });
+            const text = await response.text();
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${text}`);
+            }
+            console.log(`Developer Document sync succeeded (${syncType}): ${text}`);
+          })().catch(error => {
+            console.error(`Developer Document sync failed: ${error.message}`);
+            process.exit(1);
+          });
           NODE

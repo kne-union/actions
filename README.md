@@ -182,11 +182,9 @@ jobs:
 | `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
 | `developer_document_package_type` | string | 否 | `other` | 自动创建时写入的包类型：`frontend` / `nodejs` / `engineering` / `miniprogram` / `prompts` / `other`（仅 `npm-package`） |
 
-**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env` 写入 `OPENAPI_TIMESTAMP/EXPIRE/SIGNATURE`，后续 step 直接读 env；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（每次只调其一）。带 example 的库只对主库同步一次。类型由调用方传入，不做包名/元数据推断。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env`；sync 前会 `npm view` 短轮询。普通 npm 包走 `/open-api/sync/npm-package`（带 `type`）；`@kne-components/*` 或显式 `remote-component` 走远程组件接口。example 包 `developer_document_sync: false`。
 
-编排默认 type：`build-and-publish-lib` → `frontend`；`publish-node` → `nodejs`（可覆盖为 `engineering` 等）；`publish-miniprogram-libs` → `miniprogram`；远程组件编排不传 package type。
-
-远程组件编排（`publish-remote-components-workflow`、`publish-remote-project-workflow`）传 `developer_document_sync_type: remote-component`。
+编排默认 type：`build-and-publish-lib` → `frontend`；`publish-node` → `nodejs`（可覆盖为 `engineering`）；`publish-miniprogram-libs` → `miniprogram`；`publish-content` → `remote-component`。
 
 #### `npm-release-workflow`
 

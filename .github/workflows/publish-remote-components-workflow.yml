@@ -37,7 +37,8 @@ jobs:
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-      developer_document_sync_type: remote-component
+      # 远程组件须等 CDN 就绪后再同步文档索引，避免 defaultVersion 已升但 CDN 404
+      developer_document_sync: false
   sync-static-data:
     runs-on: ubuntu-latest
     needs: publish-npm
@@ -55,6 +56,96 @@ jobs:
       - name: Sync To UC
         run: |
           curl --header "Content-Type: application/json" --request POST --data "{\"PACKAGE_NAME\":\"${{inputs.package_name}}\"}" ${{secrets.SYNC_WEB_HOOK}}
+  sync-developer-document:
+    runs-on: ubuntu-latest
+    needs: [publish-npm, sync-uc]
+    continue-on-error: true
+    timeout-minutes: 5
+    steps:
+      - name: Generate Open API signature
+        id: sign
+        continue-on-error: true
+        env:
+          OPENAPI_APP_ID: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID }}
+          OPENAPI_APP_SECRET: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET }}
+          OPENAPI_EXPIRE_SECONDS: ${{ vars.DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS || '300' }}
+        run: |
+          if [ -z "$OPENAPI_APP_ID" ] || [ -z "$OPENAPI_APP_SECRET" ]; then
+            echo "DEVELOPER_DOCUMENT OpenAPI credentials not configured, skipping sync"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          npx -y @kne/npm-tools@0.1.65 generateOpenApiSignature \
+            --app-id "$OPENAPI_APP_ID" \
+            --app-secret "$OPENAPI_APP_SECRET" \
+            --expire-seconds "$OPENAPI_EXPIRE_SECONDS" \
+            --github-env
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+      - name: Sync To Developer Document
+        if: steps.sign.outputs.skip != 'true'
+        continue-on-error: true
+        env:
+          SYNC_URL: ${{ vars.DEVELOPER_DOCUMENT_SYNC_URL || secrets.DEVELOPER_DOCUMENT_SYNC_URL || 'https://develop.leapin-ai.com/api/v1' }}
+          OPENAPI_APP_ID: ${{ secrets.DEVELOPER_DOCUMENT_OPENAPI_APP_ID }}
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          PACKAGE_VERSION: ${{ needs.publish-npm.outputs.version }}
+        run: |
+          node <<'NODE'
+          const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
+          const packageName = process.env.PACKAGE_NAME;
+          const remote = packageName.includes('/')
+            ? packageName.split('/').slice(1).join('/')
+            : packageName.replace(/^@/, '');
+          const version = process.env.PACKAGE_VERSION;
+          const cdnBase = `https://cdn.leapin-ai.com/components/@kne-components/${remote}`;
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+          const waitForCdnReadme = async () => {
+            if (!version) return;
+            const urls = [
+              `${cdnBase}/${version}/build/README.md`,
+              `${cdnBase}/${version}/README.md`
+            ];
+            const delays = [3000, 5000, 8000, 10000, 15000];
+            for (let i = 0; i < delays.length; i += 1) {
+              for (const url of urls) {
+                try {
+                  const res = await fetch(url, { method: 'HEAD' });
+                  if (res.ok) {
+                    console.log(`CDN README ready: ${url}`);
+                    return;
+                  }
+                } catch (e) {}
+              }
+              console.log(`CDN README not ready for ${remote}@${version}, retry ${i + 1}/${delays.length}`);
+              await sleep(delays[i]);
+            }
+            console.log('CDN README still not ready, continue sync anyway');
+          };
+
+          (async () => {
+            await waitForCdnReadme();
+            const body = { remote, packageName };
+            if (version) body.version = version;
+            const res = await fetch(`${syncUrl}/open-api/sync/remote-component`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-openapi-appid': process.env.OPENAPI_APP_ID,
+                'x-openapi-timestamp': process.env.OPENAPI_TIMESTAMP,
+                'x-openapi-expire': process.env.OPENAPI_EXPIRE,
+                'x-openapi-signature': process.env.OPENAPI_SIGNATURE
+              },
+              body: JSON.stringify(body)
+            });
+            const text = await res.text();
+            console.log(res.status, text);
+            if (!res.ok) process.exit(1);
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
   release:
     needs: publish-npm
     uses: kne-union/actions/.github/workflows/npm-release-workflow.yml@master

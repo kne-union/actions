@@ -178,8 +178,9 @@ jobs:
 | `package_name` | string | 是 | - | npm 包名 |
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
 | `developer_document_sync_type` | string | 否 | `npm-package` | `npm-package`：普通库；`remote-component`：远程组件/远程项目（`remote` 由 `packageName` 去 scope 推导） |
+| `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
 
-**Developer Document 同步（可选）**：在组织/仓库 Secrets 中配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` 与 `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET` 后启用。`generateOpenApiSignature` 默认输出 `export` 语句注入 `OPENAPI_TIMESTAMP` / `OPENAPI_EXPIRE` / `OPENAPI_SIGNATURE`；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（由 `developer_document_sync_type` 控制，每次只调其一）。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env` 写入 `OPENAPI_TIMESTAMP/EXPIRE/SIGNATURE`，后续 step 直接读 env；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（每次只调其一）。带 example 的库只对主库同步一次。
 
 远程组件编排（`publish-remote-components-workflow`、`publish-remote-project-workflow`）传 `developer_document_sync_type: remote-component`。
 

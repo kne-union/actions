@@ -56,3 +56,4 @@ jobs:
     with:
       package_name: ${{inputs.package_name}}
       artifact: example-dist
+      developer_document_sync: false

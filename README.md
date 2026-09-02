@@ -97,6 +97,7 @@ Node 项目发布：可选测试 → 检出代码 → 发布 npm → 同步静�
 | `node-versions` | string | 否 | `'["18","20","22"]'` | 传给 `node-test` 的版本矩阵 |
 | `install-command` | string | 否 | `npm install` | 传给 `node-test`（无 lock 勿用 `npm ci`） |
 | `test-command` | string | 否 | `npm test` | 传给 `node-test` |
+| `developer_document_package_type` | string | 否 | `nodejs` | 传给 `publish-npm`；工程化包可传 `engineering` |
 
 开启测试的调用示例：
 
@@ -179,8 +180,11 @@ jobs:
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
 | `developer_document_sync_type` | string | 否 | `npm-package` | `npm-package`：普通库；`remote-component`：远程组件/远程项目（`remote` 由 `packageName` 去 scope 推导） |
 | `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
+| `developer_document_package_type` | string | 否 | `other` | 自动创建时写入的包类型：`frontend` / `nodejs` / `engineering` / `miniprogram` / `prompts` / `other`（仅 `npm-package`） |
 
-**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env` 写入 `OPENAPI_TIMESTAMP/EXPIRE/SIGNATURE`，后续 step 直接读 env；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（每次只调其一）。带 example 的库只对主库同步一次。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。签名 step 用 `@kne/npm-tools@0.1.65 generateOpenApiSignature --github-env` 写入 `OPENAPI_TIMESTAMP/EXPIRE/SIGNATURE`，后续 step 直接读 env；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（每次只调其一）。带 example 的库只对主库同步一次。类型由调用方传入，不做包名/元数据推断。
+
+编排默认 type：`build-and-publish-lib` → `frontend`；`publish-node` → `nodejs`（可覆盖为 `engineering` 等）；`publish-miniprogram-libs` → `miniprogram`；远程组件编排不传 package type。
 
 远程组件编排（`publish-remote-components-workflow`、`publish-remote-project-workflow`）传 `developer_document_sync_type: remote-component`。
 

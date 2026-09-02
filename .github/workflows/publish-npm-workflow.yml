@@ -18,6 +18,11 @@ on:
         type: boolean
         default: true
         description: 是否同步 developer-document；example 等附属包发布应设为 false
+      developer_document_package_type:
+        required: false
+        type: string
+        default: other
+        description: 自动创建 npm 包时的 type（frontend/nodejs/engineering/miniprogram/prompts/other）；仅 npm-package 同步生效
 permissions:
   contents: read
 
@@ -104,11 +109,13 @@ jobs:
           PACKAGE_NAME: ${{ inputs.package_name }}
           PACKAGE_VERSION: ${{ needs.publish.outputs.version }}
           DEVELOPER_DOCUMENT_SYNC_TYPE: ${{ inputs.developer_document_sync_type }}
+          DEVELOPER_DOCUMENT_PACKAGE_TYPE: ${{ inputs.developer_document_package_type }}
         run: |
           node <<'NODE'
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;
           const syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
+          const packageType = process.env.DEVELOPER_DOCUMENT_PACKAGE_TYPE || 'other';
           const headers = {
             'Content-Type': 'application/json',
             'x-openapi-appid': process.env.OPENAPI_APP_ID,
@@ -127,7 +134,7 @@ jobs:
             body = { remote, packageName };
           } else {
             path = '/open-api/sync/npm-package';
-            body = { packageName };
+            body = { packageName, type: packageType };
             if (process.env.PACKAGE_VERSION) {
               body.version = process.env.PACKAGE_VERSION;
             }

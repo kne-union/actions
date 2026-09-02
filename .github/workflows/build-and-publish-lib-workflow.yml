@@ -37,3 +37,4 @@ jobs:
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
+      developer_document_package_type: frontend

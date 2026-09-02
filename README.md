@@ -179,7 +179,7 @@ jobs:
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
 | `developer_document_sync_type` | string | 否 | `npm-package` | `npm-package`：普通库；`remote-component`：远程组件/远程项目（`remote` 由 `packageName` 去 scope 推导） |
 
-**Developer Document 同步（可选）**：在组织/仓库 Secrets 中配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` 与 `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET` 后启用；未配置则在 step 内跳过（可复用 workflow 的 job 级 `if` 不能使用 `secrets`）。签名由 `npx @kne/npm-tools generateOpenApiSignature` 生成。
+**Developer Document 同步（可选）**：在组织/仓库 Secrets 中配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` 与 `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET` 后启用。`generateOpenApiSignature` 默认输出 `export` 语句注入 `OPENAPI_TIMESTAMP` / `OPENAPI_EXPIRE` / `OPENAPI_SIGNATURE`；普通 npm 包走 `/open-api/sync/npm-package`，远程组件走 `/open-api/sync/remote-component`（由 `developer_document_sync_type` 控制，每次只调其一）。
 
 远程组件编排（`publish-remote-components-workflow`、`publish-remote-project-workflow`）传 `developer_document_sync_type: remote-component`。
 

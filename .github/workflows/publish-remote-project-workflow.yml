@@ -131,7 +131,7 @@ jobs:
               console.log(`CDN README not ready for ${remote}@${version}, retry ${i + 1}/${delays.length}`);
               await sleep(delays[i]);
             }
-            console.log('CDN README still not ready, continue sync anyway');
+            throw new Error(`CDN README not ready for ${remote}@${version} after retries`);
           };
 
           (async () => {

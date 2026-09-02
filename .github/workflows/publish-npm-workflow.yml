@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: build-dist
+      developer_document_sync_type:
+        required: false
+        type: string
+        default: npm-package
+        description: developer-document 同步类型：npm-package（普通 npm 包）或 remote-component（远程组件/远程项目）
 permissions:
   contents: read
 
@@ -75,6 +80,7 @@ jobs:
           OPENAPI_EXPIRE_SECONDS: ${{ vars.DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS || '300' }}
           PACKAGE_NAME: ${{ inputs.package_name }}
           PACKAGE_VERSION: ${{ needs.publish.outputs.version }}
+          DEVELOPER_DOCUMENT_SYNC_TYPE: ${{ inputs.developer_document_sync_type }}
         run: |
           export HEADERS_JSON=$(npx -y @kne/npm-tools generateOpenApiSignature \
             --app-id "$OPENAPI_APP_ID" \
@@ -83,12 +89,26 @@ jobs:
           node <<'NODE'
           const headers = JSON.parse(process.env.HEADERS_JSON).headers;
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
-          const body = { packageName: process.env.PACKAGE_NAME };
-          if (process.env.PACKAGE_VERSION) {
-            body.version = process.env.PACKAGE_VERSION;
+          const packageName = process.env.PACKAGE_NAME;
+          const syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
+
+          let path;
+          let body;
+          if (syncType === 'remote-component') {
+            const remote = packageName.includes('/')
+              ? packageName.split('/').slice(1).join('/')
+              : packageName.replace(/^@/, '');
+            path = '/open-api/sync/remote-component';
+            body = { remote, packageName };
+          } else {
+            path = '/open-api/sync/npm-package';
+            body = { packageName };
+            if (process.env.PACKAGE_VERSION) {
+              body.version = process.env.PACKAGE_VERSION;
+            }
           }
 
-          fetch(`${syncUrl}/open-api/sync/npm-package`, {
+          fetch(`${syncUrl}${path}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -101,10 +121,10 @@ jobs:
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${text}`);
               }
-              console.log(`Developer Document sync succeeded: ${text}`);
+              console.log(`Developer Document sync succeeded (${syncType}): ${text}`);
             })
             .catch(error => {
-              console.error(`Developer Document sync failed: ${error.message}`);
+              console.error(`Developer Document sync failed (${syncType}): ${error.message}`);
               process.exit(1);
             });
           NODE

@@ -171,14 +171,17 @@ jobs:
 
 #### `publish-npm-workflow`
 
-发布到 npm，同步 cnpm，并在配置了 Open API 密钥时触发 [developer-document](https://develop.leapin-ai.com/) 的 NPM 包同步（`POST /api/v1/open-api/sync/npm-package`）。
+发布到 npm，同步 cnpm，并在配置了 Open API 密钥时触发 [developer-document](https://develop.leapin-ai.com/) 同步。
 
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `package_name` | string | 是 | - | npm 包名 |
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
+| `developer_document_sync_type` | string | 否 | `npm-package` | `npm-package`：普通库，调 `POST /open-api/sync/npm-package`；`remote-component`：远程组件/远程项目，调 `POST /open-api/sync/remote-component`（`remote` 由 `packageName` 去 scope 推导，如 `@kne-components/components-core` → `components-core`） |
 
 **Developer Document 同步（可选）**：在组织/仓库 Secrets 中配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID` 与 `DEVELOPER_DOCUMENT_OPENAPI_APP_SECRET`（在 develop.leapin-ai.com 管理后台「密钥管理」创建）后自动启用；未配置则跳过。签名由 `npx @kne/npm-tools generateOpenApiSignature` 生成。API 根地址默认 `https://develop.leapin-ai.com/api/v1`，可通过仓库 Variable `DEVELOPER_DOCUMENT_SYNC_URL` 或 Secret `DEVELOPER_DOCUMENT_SYNC_URL` 覆盖；签名有效期秒数可通过 Variable `DEVELOPER_DOCUMENT_OPENAPI_EXPIRE_SECONDS` 调整（默认 `300`）。
+
+远程组件编排（`publish-remote-components-workflow`、`publish-remote-project-workflow`）应传 `developer_document_sync_type: remote-component`。
 
 #### `npm-release-workflow`
 

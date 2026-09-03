@@ -178,11 +178,11 @@ jobs:
 |---|---|---|---|---|
 | `package_name` | string | 是 | - | npm 包名 |
 | `artifact` | string | 否 | `build-dist` | 要下载的 artifact 名称 |
-| `developer_document_sync_type` | string | 否 | `npm-package` | `npm-package`：普通库；`remote-component`：远程组件/远程项目（`remote` 由 `packageName` 去 scope 推导） |
+| `developer_document_sync_type` | string | 否 | `npm-package` | 默认 `npm-package`（读 npm README）；仅显式传 `remote-component` 时才走远程组件接口 |
 | `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
 | `developer_document_package_type` | string | 否 | `other` | 自动创建时写入的包类型：`frontend` / `nodejs` / `engineering` / `miniprogram` / `prompts` / `other`（仅 `npm-package`） |
 
-**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。普通 npm 包在 publish 后同步；**远程组件/远程项目**在 CDN（sync-static + sync-uc）就绪并轮询 README 后再同步，避免索引读到 404。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。默认在 npm publish 后走 `npm-package` 同步（含远程组件仓）；CI **不**轮询 CDN README。需要远程组件接口时再显式传 `developer_document_sync_type: remote-component`。
 
 #### `npm-release-workflow`
 

@@ -120,11 +120,7 @@ jobs:
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;
           const packageType = process.env.DEVELOPER_DOCUMENT_PACKAGE_TYPE || 'other';
-          let syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
-          // @kne-components/* 默认走远程组件同步
-          if (syncType === 'npm-package' && packageName.startsWith('@kne-components/')) {
-            syncType = 'remote-component';
-          }
+          const syncType = process.env.DEVELOPER_DOCUMENT_SYNC_TYPE || 'npm-package';
 
           const headers = {
             'Content-Type': 'application/json',

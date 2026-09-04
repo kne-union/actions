@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish
     continue-on-error: true
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
       - name: Generate Open API signature
         id: sign

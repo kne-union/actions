@@ -37,8 +37,7 @@ jobs:
     secrets: inherit
     with:
       package_name: ${{inputs.package_name}}
-      # 文档同步默认走 npm-package（读 npm README），不在 CI 等待 CDN
-      developer_document_sync_type: npm-package
+      developer_document_sync_type: remote-component
       developer_document_package_type: frontend
   sync-static-data:
     runs-on: ubuntu-latest

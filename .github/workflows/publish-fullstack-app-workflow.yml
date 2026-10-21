@@ -1,0 +1,93 @@
+on:
+  workflow_call:
+    inputs:
+      node-versions:
+        description: '后端单测的 Node 版本矩阵 JSON'
+        required: false
+        type: string
+        default: '["20","22"]'
+      server-install-command:
+        description: '后端依赖安装命令（server 子包勿用 --legacy-peer-deps，会剪掉 peer 依赖）'
+        required: false
+        type: string
+        default: 'cd server && npm install'
+      server-test-command:
+        description: '后端单测命令'
+        required: false
+        type: string
+        default: 'cd server && npm test'
+      install-command:
+        description: '根目录（前端）依赖安装命令'
+        required: false
+        type: string
+        default: 'npm install'
+      build-command:
+        description: '前端构建命令，产物须在 build/ 且含 entry.html 等入口'
+        required: false
+        type: string
+        default: 'npm run build'
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    uses: kne-union/actions/.github/workflows/node-test.yml@master
+    with:
+      node-versions: ${{ inputs.node-versions }}
+      install-command: ${{ inputs.server-install-command }}
+      test-command: ${{ inputs.server-test-command }}
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+      file: ${{ steps.pack.outputs.file }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Check release not exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if gh release view "$VERSION" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "::error::Release $VERSION 已存在，请先升级根目录 package.json 的 version"
+            exit 1
+          fi
+      - run: ${{ inputs.install-command }}
+      - run: ${{ inputs.build-command }}
+      - name: Pack app
+        id: pack
+        run: |
+          NAME=$(node -p "require('./package.json').name.replace(/^@[^/]+\//, '')")
+          VERSION=$(node -p "require('./package.json').version")
+          FILE="$NAME-$VERSION.zip"
+          npx -y @kne/npm-tools@latest packApp --out "./app-package/$FILE"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: app-package
+          path: ./app-package
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: app-package
+          path: ./app-package
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.build.outputs.version }}
+          commit: ${{ github.sha }}
+          artifacts: ./app-package/${{ needs.build.outputs.file }}
+          artifactContentType: application/zip

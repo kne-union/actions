@@ -122,7 +122,7 @@ jobs:
 
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
-| `node-versions` | string | 否 | `'["20","22"]'` | 后端单测的 Node 版本矩阵 |
+| `node-versions` | string | 否 | `'["20","22","24","26"]'` | 后端单测的 Node 版本矩阵 |
 | `server-install-command` | string | 否 | `cd server && npm install` | 后端依赖安装命令（勿加 `--legacy-peer-deps`） |
 | `server-test-command` | string | 否 | `cd server && npm test` | 后端单测命令 |
 | `install-command` | string | 否 | `npm install` | 根目录（前端）依赖安装命令 |

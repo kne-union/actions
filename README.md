@@ -16,6 +16,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 │  publish-remote-project-workflow    构建 + npm + 静态数据 + UC同步 + Release   │
 │  publish-miniprogram-libs-workflow  构建 + 小程序发布 + npm + 二维码 + Release │
 │  publish-node-workflow              可选测试 + 检出 + npm + 静态数据 + Release │
+│  publish-fullstack-app-workflow     后端单测 + 构建 + 打包 zip + Release       │
 │  publish-content-workflow           内容生成 + 静态部署 + 可选npm              │
 │  complete-issue-workflow            PR合并后关闭Issue + 删除分支               │
 └──────────────────────────────────┬──────────────────────────────────┘
@@ -109,6 +110,38 @@ jobs:
     with:
       package_name: '@kne/your-package'
       run_test: true
+```
+
+#### `publish-fullstack-app-workflow`
+
+全栈应用发布（`@kne-template/fullstack-biz-app` 结构）：后端单测（`node-test`）→ 前端构建 → `npx @kne/npm-tools packApp` 打成可部署 zip → 创建 GitHub Release 并上传 zip。不发布 npm。
+
+- Release tag 为根目录 `package.json` 的 `version`；该 Release 已存在时构建失败，提示先升级版本
+- zip 文件名为 `<name 去 scope>-<version>.zip`，内容为 `package.json`、`build/`、`server/`（规则见 `packApp`）
+- 后端单测默认在 `server/` 下执行 `npm test`，`server/package.json` 须有 `test` 脚本
+
+| 输入参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `node-versions` | string | 否 | `'["20","22"]'` | 后端单测的 Node 版本矩阵 |
+| `server-install-command` | string | 否 | `cd server && npm install` | 后端依赖安装命令（勿加 `--legacy-peer-deps`） |
+| `server-test-command` | string | 否 | `cd server && npm test` | 后端单测命令 |
+| `install-command` | string | 否 | `npm install` | 根目录（前端）依赖安装命令 |
+| `build-command` | string | 否 | `npm run build` | 前端构建命令，产物须在 `build/` |
+
+业务仓库引用示例：
+
+```yaml
+name: Publish App
+on:
+  pull_request:
+    branches: [master]
+    types:
+      - closed
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true
+    uses: kne-union/actions/.github/workflows/publish-fullstack-app-workflow.yml@master
+    secrets: inherit
 ```
 
 #### `publish-content-workflow`

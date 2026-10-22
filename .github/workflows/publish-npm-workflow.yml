@@ -167,18 +167,20 @@ jobs:
               }
             }
 
-            const response = await fetch(`${syncUrl}${path}`, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(body)
+            const url = new URL(`${syncUrl}${path}`);
+            const client = require(url.protocol === 'http:' ? 'node:http' : 'node:https');
+            const req = client.request(url, { method: 'POST', headers });
+            req.on('finish', () => {
+              console.log(`Developer Document sync triggered (${syncType}), not waiting for result`);
+              process.exit(0);
             });
-            const text = await response.text();
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${text}`);
-            }
-            console.log(`Developer Document sync succeeded (${syncType}): ${text}`);
+            req.on('error', error => {
+              console.error(`Developer Document sync request error: ${error.message}`);
+              process.exit(0);
+            });
+            req.end(JSON.stringify(body));
           })().catch(error => {
             console.error(`Developer Document sync failed: ${error.message}`);
-            process.exit(1);
+            process.exit(0);
           });
           NODE

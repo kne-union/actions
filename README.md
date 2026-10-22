@@ -215,7 +215,7 @@ jobs:
 | `developer_document_sync` | boolean | 否 | `true` | 是否同步 developer-document；example 包传 `false` |
 | `developer_document_package_type` | string | 否 | `other` | 自动创建时写入的包类型：`frontend` / `nodejs` / `engineering` / `miniprogram` / `prompts` / `other`（仅 `npm-package`） |
 
-**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。默认在 npm publish 后走 `npm-package` 同步（含远程组件仓）；CI **不**轮询 CDN README。需要远程组件接口时再显式传 `developer_document_sync_type: remote-component`。
+**Developer Document 同步（可选）**：配置 `DEVELOPER_DOCUMENT_OPENAPI_APP_ID/SECRET` 后启用。默认在 npm publish 后走 `npm-package` 同步（含远程组件仓）；CI **不**轮询 CDN README，也**不**等待同步结果（请求发出即视为成功）。需要远程组件接口时再显式传 `developer_document_sync_type: remote-component`。
 
 #### `npm-release-workflow`
 

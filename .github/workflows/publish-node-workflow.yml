@@ -13,7 +13,7 @@ on:
         description: '传给 node-test 的 Node 版本矩阵 JSON'
         required: false
         type: string
-        default: '["18","20","22"]'
+        default: '["20","22","24","26"]'
       install-command:
         description: '传给 node-test；无 lock 时用 npm install'
         required: false

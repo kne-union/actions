@@ -7,10 +7,10 @@ on:
         type: boolean
         default: true
       node-versions:
-        description: 'JSON 数组，Node 版本矩阵，例如 ["18","20","22"]'
+        description: 'JSON 数组，Node 版本矩阵，例如 ["20","22","24","26"]'
         required: false
         type: string
-        default: '["18","20","22"]'
+        default: '["20","22","24","26"]'
       install-command:
         description: '依赖安装命令（无 lock 文件时用 npm install，勿用 npm ci）'
         required: false

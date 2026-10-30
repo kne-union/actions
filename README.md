@@ -32,7 +32,7 @@ kne-union 组织的 GitHub Actions 可复用工作流集合，用于统一管理
 │                          基础层                                     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  node-test                          Node 多版本 npm test             │
-│  publish-npm-workflow               npm发布 + cnpm同步 + 开发者文档同步  │
+│  publish-npm-workflow               npm发布 + 版本检查 + cnpm/文档同步   │
 │  npm-release-workflow               GitHub Release创建              │
 │  publish-miniprogram-workflow       微信小程序上传                   │
 │  publish-miniprogram-qrcode         小程序二维码生成 + 静态部署      │
@@ -206,6 +206,8 @@ jobs:
 #### `publish-npm-workflow`
 
 发布到 npm，同步 cnpm，并在配置了 Open API 密钥时触发 [developer-document](https://develop.leapin-ai.com/) 同步。
+
+**发布检查（`verify`）**：`npm publish` 后轮询 `npm view <package>@<version>`，直到本次版本在 npm 上可见（最长约 13 分钟，超时失败）；cnpm 同步、developer-document 同步以及调用方 `needs: publish-npm` 的下游 job 都在检查通过后才执行。若持续超时且 npmjs 上该版本处于待批准状态（staged publish），需在 npm 上人工批准。
 
 | 输入参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|

@@ -69,9 +69,34 @@ jobs:
             ARGS="$ARGS --tag ${{ steps.tag.outputs.tag }}"
           fi
           npm publish $ARGS
-  sync-cnpm:
+  verify:
     runs-on: ubuntu-latest
     needs: publish
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: https://registry.npmjs.org/
+          node-version: 24
+      - name: Wait for npm version visible
+        env:
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          for i in $(seq 1 80); do
+            V=$(npm view "$PACKAGE_NAME@$VERSION" version --prefer-online 2>/dev/null || true)
+            if [ "$V" = "$VERSION" ]; then
+              echo "npm $PACKAGE_NAME@$VERSION is visible"
+              exit 0
+            fi
+            echo "waiting npm $PACKAGE_NAME@$VERSION ($i/80)"
+            sleep 10
+          done
+          echo "::error::$PACKAGE_NAME@$VERSION not visible on npm after verification timeout"
+          exit 1
+  sync-cnpm:
+    runs-on: ubuntu-latest
+    needs: verify
     continue-on-error: true
     steps:
       - name: Sync To Cnpm
@@ -81,7 +106,7 @@ jobs:
   sync-developer-document:
     if: inputs.developer_document_sync
     runs-on: ubuntu-latest
-    needs: publish
+    needs: [publish, verify]
     continue-on-error: true
     timeout-minutes: 5
     steps:
@@ -116,7 +141,6 @@ jobs:
           DEVELOPER_DOCUMENT_PACKAGE_TYPE: ${{ inputs.developer_document_package_type }}
         run: |
           node <<'NODE'
-          const { execSync } = require('node:child_process');
           const syncUrl = (process.env.SYNC_URL || 'https://develop.leapin-ai.com/api/v1').replace(/\/$/, '');
           const packageName = process.env.PACKAGE_NAME;
           const packageType = process.env.DEVELOPER_DOCUMENT_PACKAGE_TYPE || 'other';
@@ -130,24 +154,7 @@ jobs:
             'x-openapi-signature': process.env.OPENAPI_SIGNATURE
           };
 
-          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          const waitForNpm = async () => {
-            const delays = [2000, 5000, 8000, 10000];
-            for (let i = 0; i < delays.length; i += 1) {
-              try {
-                execSync(`npm view ${packageName} version`, { stdio: ['ignore', 'pipe', 'ignore'] });
-                return;
-              } catch (e) {
-                console.log(`npm view ${packageName} not ready, retry ${i + 1}/${delays.length}`);
-                await sleep(delays[i]);
-              }
-            }
-            console.log(`npm view ${packageName} still not ready, continue sync anyway`);
-          };
-
           (async () => {
-            await waitForNpm();
-
             let path;
             let body;
             if (syncType === 'remote-component') {
